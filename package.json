@@ -1,0 +1,40 @@
+{
+  "name": "@mobile/alloy-babel",
+  "version": "0.0.1-beta.1",
+  "description": "a node.js module",
+  "keywords": [],
+  "homepage": "git://github.com/mobilehero/alloy-babel",
+  "bugs": {
+    "url": "https://github.com/mobilehero/alloy-babel/issues",
+    "email": "info@mobilehero.me"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Brenton House",
+    "email": "brenton.house@gmail.com",
+    "url": "https://github.com/brentonhouse"
+  },
+  "main": "./alloy-babel.js",
+  "scripts": {
+    "add": "git add -A",
+    "add-version": "npm run add && node scripts/version",
+    "push": "npm run add-version --",
+    "postpush": "git push",
+    "autopull": "node scripts/autopull"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mobilehero/alloy-babel.git"
+  },
+  "devDependencies": {
+    "semver": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=0.10"
+  },
+  "dependencies": {
+    "babel-core": "^6.9.1",
+    "lodash": "^4.13.1",
+    "wrench": "^1.5.9"
+  }
+}
