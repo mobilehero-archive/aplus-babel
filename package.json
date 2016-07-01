@@ -1,11 +1,19 @@
 {
-  "name": "@mobile/alloy-babel",
-  "version": "0.0.1-beta.2",
-  "description": "a node.js module",
-  "keywords": [],
-  "homepage": "git://github.com/mobilehero/alloy-babel",
+  "name": "@aplus/babel",
+  "version": "0.0.5-beta.1",
+  "description": "Alloy+ plugin for transforming Alloy code using babel",
+  "keywords": [
+    "Appcelerator",
+    "Alloy",
+    "MobileHero",
+    "Alloy+",
+    "aplus",
+    "plugin",
+    "node"
+  ],
+  "homepage": "git://github.com/mobilehero/aplus-babel",
   "bugs": {
-    "url": "https://github.com/mobilehero/alloy-babel/issues",
+    "url": "https://github.com/mobilehero/aplus-babel/issues",
     "email": "info@mobilehero.me"
   },
   "license": "MIT",
@@ -14,7 +22,7 @@
     "email": "brenton.house@gmail.com",
     "url": "https://github.com/brentonhouse"
   },
-  "main": "./alloy-babel.js",
+  "main": "./aplus-babel.js",
   "scripts": {
     "add": "git add -A",
     "add-version": "npm run add && node scripts/version",
@@ -24,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mobilehero/alloy-babel.git"
+    "url": "git://github.com/mobilehero/aplus-babel.git"
   },
   "devDependencies": {
     "semver": "^5.1.0"

@@ -12,7 +12,7 @@
  * Alloy+ plugin for running babel transformations on your Appcelerator code
  * 
  * @module 
- * alloy-babel 
+ * @aplus/babel
  * 
  * @author 
  * Brenton House <brenton.house@gmail.com>
@@ -38,7 +38,7 @@ var babel = require('babel-core');
  * 
  * @param {object} params
  */
-function alloy_babel(params) {
+function plugin(params) {
 
 	logger = params.logger;
 	params.dirname = params.dirname || params.event.dir.lib;
@@ -104,4 +104,4 @@ function translateFile(filepath, babelConfig) {
 	fs.writeFileSync(filepath, modified);
 }
 
-module.exports = alloy_babel;
+module.exports = plugin;
