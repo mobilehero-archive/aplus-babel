@@ -98,7 +98,7 @@ any generated files have already been placed in the resource folder._
 
 ## Other Alloy+ Plugins 
 
-> ** Coming Soon! :mega: **
+> **Coming Soon! :mega:**
 
 - [`npm`][]: Execute npm during the Alloy build process
 - [`underscore`][]: Fix some issues with the usage of underscore in Alloy and allow upgrading to lodash
