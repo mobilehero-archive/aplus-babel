@@ -82,18 +82,19 @@ To use this installed plugin in your app, merge the following to your app's `con
 ```json
 	{
 		"tasks": {
-			"postcompile": [ "@aplus/babel" ]
+			"precompile": [ "@aplus/babel" ],
+			"preparse": [ "@aplus/babel" ]
 		}
 ```
 
 
->_Most often, you will probably want to run these in the `postcompile` stage of the Alloy build process so that 
-any generated files have already been placed in the resource folder._
+>_Most often, you will probably want to run these in the `postcompile` and `preparse` stages of the Alloy build process so that 
+all files can be converted._
 
 ### Examples
 
 **Run babel in the Platform-specific resource folder**  
-&nbsp;&nbsp;&nbsp;&nbsp;`"postcompile": [ "aplus-babel" ]`
+&nbsp;&nbsp;&nbsp;&nbsp;`"precompile": [ "aplus-babel" ]`
 
 
 ## Other Alloy+ Plugins 

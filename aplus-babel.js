@@ -32,6 +32,7 @@ var wrench = require('wrench');
 var _ = require('lodash');
 var logger;
 var babel = require('babel-core');
+var minimatch = require('minimatch');
 
 /**
  * Run babel tranformations on Alloy source code
@@ -41,18 +42,26 @@ var babel = require('babel-core');
 function plugin(params) {
 
 	logger = params.logger;
-	params.dirname = params.dirname || params.event.dir.lib;
-	params.dirname = params.dirname ? _.template(params.dirname)(params) : params.event.dir.lib;
+	params.dirname = params.dirname ? _.template(params.dirname)(params) : params.event.dir.resourcesPlatform;
 
 	logger.trace("running babel in directory: " + params.dirname);
 
-	var babelConfig = params.config.babel || {};
-
-	var files = findFiles(dirname);
-	_.forEach(files, function(file) {
-		translateFile(path.join(rootpath, file));
+	_.defaults(params, {
+		options: {},
+		includes: ["**/*.js", "!backbone.js"]
 	});
 
+	var babelOptions = params.options;
+	logger.trace(JSON.stringify(params, null, 2));
+
+	if (params.code) {
+		params.code = translateCode(params.code, babelOptions);
+	} else {
+		var files = findFiles(params.dirname, params.includes);
+		_.forEach(files, function(file) {
+			translateFile(path.join(params.dirname, file), babelOptions);
+		});
+	}
 }
 
 
@@ -73,24 +82,50 @@ function replaceBackSlashes(str) {
 	return str.replace(/\\/g, '/');
 };
 
+
 /**
  * Find all files that match extension criteria
  * 
  * @param extensions (array of extensions)
  * @returns (bool)
  */
-function findFiles(rootpath, extensions) {
+function findFiles(rootpath, patterns) {
 	logger.trace("inside findFiles()");
-	var extensions = extensions || ['js'];
-	var regex = new RegExp('^.+\.(' + extensions.join('|') + ')$');
-
+	var patterns = patterns || ['**'];
 	var files = _.map(wrench.readdirSyncRecursive(rootpath), function(filename) {
 		return path.posix.sep + replaceBackSlashes(filename);
 	});
-	return _.filter(files, function(file) {
-		return regex.test(file) && !fs.statSync(path.join(rootpath, file)).isDirectory();
+	var matchedFiles = match(files, patterns, {
+		nocase: true,
+		matchBase: true,
+		dot: true,
+	});
+	return _.filter(matchedFiles, function(file) {
+		return !fs.statSync(path.join(rootpath, file)).isDirectory();
 	}) || [];
+
 };
+
+// Adapted from https://github.com/sindresorhus/multimatch
+function match(list, patterns, options) {
+	list = list || [];
+	patterns = patterns || [];
+
+	if (list.length === 0 || patterns.length === 0) {
+		return [];
+	}
+
+	options = options || {};
+	return patterns.reduce(function(ret, pattern) {
+		var process = _.union
+		if (pattern[0] === '!') {
+			pattern = pattern.slice(1);
+			process = _.difference;
+		}
+		return process(ret, minimatch.match(list, pattern, options));
+	}, []);
+};
+
 
 
 function translateFile(filepath, babelConfig) {
@@ -99,9 +134,15 @@ function translateFile(filepath, babelConfig) {
 	// var result = babel.transform(content, {
 	// 	presets: ['es2015']
 	// });
-	var result = babel.transform(content, babelConfig);
+
+	var result = translateCode(content, babelConfig);
+	fs.writeFileSync(filepath, result);
+}
+
+function translateCode(code, babelConfig) {
+	var result = babel.transform(code, babelConfig);
 	var modified = result.code;
-	fs.writeFileSync(filepath, modified);
+	return modified;
 }
 
 module.exports = plugin;
