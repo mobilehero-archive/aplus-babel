@@ -1,6 +1,6 @@
 {
   "name": "@aplus/babel",
-  "version": "0.0.5-beta.4",
+  "version": "0.0.5-beta.5",
   "description": "Alloy+ plugin for transforming Alloy code using babel",
   "keywords": [
     "Appcelerator",

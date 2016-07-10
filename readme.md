@@ -81,14 +81,12 @@ To use this installed plugin in your app, merge the following to your app's `con
 
 ```json
 	{
-		"tasks": {
-			"precompile": [ "@aplus/babel" ],
-			"preparse": [ "@aplus/babel" ]
-		}
+		"tasks": [ "@aplus/babel" ]
+	}
 ```
 
 
->_Most often, you will probably want to run these in the `postcompile` and `preparse` stages of the Alloy build process so that 
+>_In default mode, the task will run in the `postcompile` and `preparse` stages of the Alloy build process so that 
 all files can be converted._
 
 ### Examples

@@ -52,7 +52,7 @@ function plugin(params) {
 	});
 
 	var babelOptions = params.options;
-	logger.trace(JSON.stringify(params, null, 2));
+	// logger.trace(JSON.stringify(params, null, 2));
 
 	if (params.code) {
 		params.code = translateCode(params.code, babelOptions);
@@ -129,7 +129,7 @@ function match(list, patterns, options) {
 
 
 function translateFile(filepath, babelConfig) {
-	logger.trace("translateFile():  translating file - " + filepath);
+	logger.trace("translating file - " + filepath);
 	var content = fs.readFileSync(filepath, 'utf8');
 	// var result = babel.transform(content, {
 	// 	presets: ['es2015']
@@ -145,4 +145,14 @@ function translateCode(code, babelConfig) {
 	return modified;
 }
 
-module.exports = plugin;
+module.exports.execute = plugin;
+module.exports.tasks = [{
+	"module": module.id,
+	"options": {
+		"presets": [
+			"es2015"
+		]
+	},
+	"includes": ["**/*.js", "!backbone2.js"],
+	"events": ["preload", "preparse"]
+}]
