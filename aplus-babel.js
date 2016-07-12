@@ -22,7 +22,7 @@
  *      
  * @license
  * Licensed under the terms of the MIT License (MIT)
- * Please see the LICENSE.md included with this distribution for details.
+ * Please see the license.md included with this distribution for details.
  * 
  */
 
@@ -37,7 +37,49 @@ var minimatch = require('minimatch');
 /**
  * Run babel tranformations on Alloy source code
  * 
- * @param {object} params
+ * @param {Object} params - parameters available for executing of Alloy+ plugin.
+ * @param {Object} params.event - Provides a set of objects and values which may be useful for building tasks:
+ * @param {Object} params.event.alloyConfig - Contains Alloy compiler configuration information.
+ * @param {string} params.event.alloyConfig.platform - either android, ios, mobileweb or windows.
+ * @param {string} [params.event.alloyConfig.file] - file to target for selective compilation.
+ * @param {string} params.event.alloyConfig.deploytype - compilation environment type: either development, test or production.
+ * @param {string} params.event.alloyConfig.beautify - if set to true, the output from UglifyJS will be beautified.
+ * @param {string} params.event.autoStyle - If set to true, autostyle is enabled for the entire project.
+ * @param {Object} params.event.dependencies - If set to true, autostyle is enabled for the entire project.
+ * @param {Object} params.event.dir - Contains directory paths to various resources.
+ * @param {string} params.event.dir.home - absolute path to the Alloy project's app directory.
+ * @param {string} params.event.dir.project - absolute path to the Alloy project's root directory.
+ * @param {string} params.event.dir.resources - absolute path to the Alloy project's Resource directory.
+ * @param {string} params.event.dir.resourcesAlloy - absolute path to the Alloy project's Resource/alloy directory.
+ * @param {string} params.event.dir.resourcesPlatform - absolute path to the Alloy project's Resource/{platform} directory. (i.e. /Resources/iphone)
+ * @param {string} params.event.dir.assets - absolute path to the Alloy project's assets.
+ * @param {string} params.event.dir.config - absolute path to the Alloy project's config.
+ * @param {string} params.event.dir.controllers - absolute path to the Alloy project's controllers.
+ * @param {string} params.event.dir.migrations - absolute path to the Alloy project's migrations.
+ * @param {string} params.event.dir.models - absolute path to the Alloy project's models.
+ * @param {string} params.event.dir.styles - absolute path to the Alloy project's styles.
+ * @param {string} params.event.dir.themes - absolute path to the Alloy project's themes.
+ * @param {string} params.event.dir.views - absolute path to the Alloy project's views.
+ * @param {string} params.event.dir.widgets - absolute path to the Alloy project's widgets.
+ * @param {string} params.event.dir.builtins - absolute path to the Alloy project's builtins.
+ * @param {string} params.event.dir.template - absolute path to the Alloy project's template.
+ * @param {string} params.event.sourcemap - If true, generates the source mapping files for use with the Studio debugger and other functions.
+These files maps the generated Titanium files in the Resources directory to the ones in the app directory.
+ * @param {string} params.event.theme - Name of the theme being used.
+ * @param {string} [params.event.code] - Only present for the appjs build hook. Contains the contents of the app.js file.
+ * @param {string} [params.event.appJSFile] - Only present for the appjs build hook. Contains the the absolute path to the app.js file.
+ * @param {Object} params.logger - Alloy logger object
+ * @param {string[]} [params.includes] - Array of glob patterns to match files to be included in transformation
+ * @param {string} [params.code]
+ * @param {Object} params.options - babel configuration object (see http://babeljs.io/docs/usage/options/)
+ * @param {string[]} [params.options.presets=[]] - List of presets (a set of plugins) to load and use..
+ * @param {string[]} [options.plugins=[]] - List of plugins to load and use.
+ * @param {boolean} [params.options.babelrc=true] - Specify whether or not to use .babelrc and .babelignore files.
+ * @param {boolean} [params.options.ast=true] - Include the AST in the returned object
+ * @param {boolean} [params.options.minified=true] - Should the output be minified (not printing last semicolons in blocks, printing literal string values instead of escaped ones, stripping () from new when safe)
+ * @param {boolean} [params.options.comments=true] - Output comments in generated output.
+ * @param {Object} [params.options.env={}] - This is an object of keys that represent different environments. For example, you may have: { env: { production: { someOption: true } } } which will use those options when the enviroment variable BABEL_ENV is set to "production". If BABEL_ENV isn’t set then NODE_ENV will be used, if it’s not set then it defaults to "development"
+ * @param {string} [params.options.extends=null] - A path to an .babelrc file to extend
  */
 function plugin(params) {
 
@@ -51,47 +93,47 @@ function plugin(params) {
 		includes: ["**/*.js", "!backbone.js"]
 	});
 
-	var babelOptions = params.options;
-	// logger.trace(JSON.stringify(params, null, 2));
-
 	if (params.code) {
-		params.code = translateCode(params.code, babelOptions);
+		params.code = transformCode(params.code, params.options);
 	} else {
 		var files = findFiles(params.dirname, params.includes);
 		_.forEach(files, function(file) {
-			translateFile(path.join(params.dirname, file), babelOptions);
+			transformFile(path.join(params.dirname, file), params.options);
 		});
 	}
 }
 
-
 /**
  * Replace backslashes for cross-platform usage
+ * Adapted from https://github.com/sindresorhus/slash
  * 
- * @param str Input to be modified
- * @returns Modified string
+ * @param {string} intput - value needing to have backslashes replaced in.
+ * @returns {string}
  */
-function replaceBackSlashes(str) {
-	var isExtendedLengthPath = /^\\\\\?\\/.test(str);
-	var hasNonAscii = /[^\x00-\x80]+/.test(str);
+function replaceBackSlashes(input) {
+	var isExtendedLengthPath = /^\\\\\?\\/.test(input);
+	var hasNonAscii = /[^\x00-\x80]+/.test(input);
 
 	if (isExtendedLengthPath || hasNonAscii) {
-		return str;
+		return input;
 	}
 
-	return str.replace(/\\/g, '/');
+	return input.replace(/\\/g, '/');
 };
-
 
 /**
  * Find all files that match extension criteria
  * 
- * @param extensions (array of extensions)
- * @returns (bool)
+ * @param {string} rootpath - Absolute path of the directory from which file search will begin
+ * @param {string[]|string} [patterns="**"] - Pattern(s) to be used when attempting to match files found
+ * @returns {string[]} - Matched file paths
  */
 function findFiles(rootpath, patterns) {
 	logger.trace("inside findFiles()");
 	var patterns = patterns || ['**'];
+	if (_.isString(patterns)) {
+		patterns = [patterns];
+	}
 	var files = _.map(wrench.readdirSyncRecursive(rootpath), function(filename) {
 		return path.posix.sep + replaceBackSlashes(filename);
 	});
@@ -106,10 +148,21 @@ function findFiles(rootpath, patterns) {
 
 };
 
-// Adapted from https://github.com/sindresorhus/multimatch
+/**
+ * Find items in array that match a set of patterns
+ * Adapted from https://github.com/sindresorhus/multimatch
+ * 
+ * @param {string[]} list
+ * @param {string[]|string} patterns
+ * @param {Object} options
+ * @returns {string[]}
+ */
 function match(list, patterns, options) {
 	list = list || [];
 	patterns = patterns || [];
+	if (_.isString(patterns)) {
+		patterns = [patterns];
+	}
 
 	if (list.length === 0 || patterns.length === 0) {
 		return [];
@@ -127,32 +180,46 @@ function match(list, patterns, options) {
 };
 
 
-
-function translateFile(filepath, babelConfig) {
-	logger.trace("translating file - " + filepath);
+/**
+ * Transform a file with babeljs using babel config
+ * 
+ * @param {string} filepath - absolute path of the file to be transformed
+ * @param {Object} options - babel configuration object (see http://babeljs.io/docs/usage/options/)
+ * @param {string[]} [options.presets=[]] - List of presets (a set of plugins) to load and use..
+ * @param {string[]} [options.plugins=[]] - List of plugins to load and use.
+ * @param {boolean} [options.babelrc=true] - Specify whether or not to use .babelrc and .babelignore files.
+ * @param {boolean} [options.ast=true] - Include the AST in the returned object
+ * @param {boolean} [options.minified=true] - Should the output be minified (not printing last semicolons in blocks, printing literal string values instead of escaped ones, stripping () from new when safe)
+ * @param {boolean} [options.comments=true] - Output comments in generated output.
+ * @param {Object} [options.env={}] - This is an object of keys that represent different environments. For example, you may have: { env: { production: { someOption: true } } } which will use those options when the enviroment variable BABEL_ENV is set to "production". If BABEL_ENV isn’t set then NODE_ENV will be used, if it’s not set then it defaults to "development"
+ * @param {string} [options.extends=null] - A path to an .babelrc file to extend
+ */
+function transformFile(filepath, options) {
+	logger.trace("transforming file - " + filepath);
 	var content = fs.readFileSync(filepath, 'utf8');
-	// var result = babel.transform(content, {
-	// 	presets: ['es2015']
-	// });
-
-	var result = translateCode(content, babelConfig);
+	var result = transformCode(content, options);
 	fs.writeFileSync(filepath, result);
 }
 
-function translateCode(code, babelConfig) {
-	var result = babel.transform(code, babelConfig);
+/**
+ * Transform the code with bablejs using babel config.
+ * 
+ * @param {string} code - code to transform using babeljs
+ * @param {Object} options - babel configuration object (see http://babeljs.io/docs/usage/options/)
+ * @param {string[]} [options.presets=[]] - List of presets (a set of plugins) to load and use..
+ * @param {string[]} [options.plugins=[]] - List of plugins to load and use.
+ * @param {boolean} [options.babelrc=true] - Specify whether or not to use .babelrc and .babelignore files.
+ * @param {boolean} [options.ast=true] - Include the AST in the returned object
+ * @param {boolean} [options.minified=true] - Should the output be minified (not printing last semicolons in blocks, printing literal string values instead of escaped ones, stripping () from new when safe)
+ * @param {boolean} [options.comments=true] - Output comments in generated output.
+ * @param {Object} [options.env={}] - This is an object of keys that represent different environments. For example, you may have: { env: { production: { someOption: true } } } which will use those options when the enviroment variable BABEL_ENV is set to "production". If BABEL_ENV isn’t set then NODE_ENV will be used, if it’s not set then it defaults to "development"
+ * @param {string} [options.extends=null] - A path to an .babelrc file to extend
+ */
+function transformCode(code, options) {
+	var result = babel.transform(code, options);
 	var modified = result.code;
 	return modified;
 }
 
 module.exports.execute = plugin;
-module.exports.tasks = [{
-	"module": module.id,
-	"options": {
-		"presets": [
-			"es2015"
-		]
-	},
-	"includes": ["**/*.js", "!backbone2.js"],
-	"events": ["preload", "preparse"]
-}]
+module.exports.tasks = [];

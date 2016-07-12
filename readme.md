@@ -1,10 +1,10 @@
 <h3 align="center">
-	<img src="https://cdn.secure-api.org/images/aplus-node.svg" alt="aplus-node logo" />
+	<img src="https://cdn.secure-api.org/images/aplus-babel.svg" alt="aplus-babel logo" />
 </h3>
 
 > ⚠️ **CAUTION:  PRE-PRODUCTION BETA** ⚠️   
 >_(breaking changes may be introduced before 1.0.0 release)_
-**
+
 
 # alloy+ plugin: `babel`
 
@@ -67,7 +67,8 @@ npm install --save @aplus/bundle
 
 ## Installing this plugin
 
-> _All modules should be installed in the root directory of your Appcelerator mobile project (the directory containing `tiapp.xml`)._
+> _All modules should be installed in the root directory of your Appcelerator mobile project 
+(the directory containing `tiapp.xml`)._
 
 [![npm version](https://badge.fury.io/js/%40aplus%2Fbabel.svg)](https://badge.fury.io/js/%40aplus%2Fbabel)
 
@@ -81,28 +82,35 @@ To use this installed plugin in your app, merge the following to your app's `con
 
 ```json
 	{
-		"tasks": [ "@aplus/babel" ]
+		"tasks": [ {
+			"module": "@aplus/babel",
+			"options": {
+				"plugins": [ "some-babeljs-plugin" ],
+				"presets": [ "some-babeljs-preset" ]
+			}
+			}
+		]
 	}
 ```
 
 
->_In default mode, the task will run in the `postcompile` and `preparse` stages of the Alloy build process so that 
-all files can be converted._
+>_In default mode, the task will run in the `postcompile` and `preparse` stages of the Alloy build
+process so that all files can be converted._
 
 ### Examples
 
-**Run babel in the Platform-specific resource folder**  
-&nbsp;&nbsp;&nbsp;&nbsp;`"precompile": [ "aplus-babel" ]`
+_See Alloy+ plugin: [`es6`][] for an example of using babel to transform using the ES2015 preset._
 
 
 ## Other Alloy+ Plugins 
 
 > **Coming Soon! :mega:**
 
-- [`npm`][]: Execute npm during the Alloy build process
-- [`underscore`][]: Fix some issues with the usage of underscore in Alloy and allow upgrading to lodash
+- [`babel`][]: Run babel transformations on your code during the build process
 - [`es6`][]: Use ES6/ES2015 code in your apps via babel transformations!
 - [`node`][]: Make `require` statements in your app support nodejs packages installed via npm
+- [`npm`][]: Execute npm during the Alloy build process
+- [`underscore`][]: Fix some issues with the usage of underscore in Alloy and allow upgrading to lodash
 
 _You can also search for more plugins developed by the community._
 
@@ -121,10 +129,10 @@ See the [license.md](https://github.com/mobilehero/aplus-core/blob/master/licens
 
 Superhero Studios Incorporated and this project are in no way affiliated with any of the following companies:
 
-* _Appcelerator, Inc_
-* _Axway Inc_
-* _Apple Inc_
-* _Google Inc_
+- _Appcelerator, Inc_
+- _Axway Inc_
+- _Apple Inc_
+- _Google Inc_
 
 _Alloy is developed by Appcelerator and the community and is Copyright (c) 2012 by Appcelerator, Inc. All Rights Reserved. 
 Alloy is made available under the Apache Public License, version 2. See their [LICENSE](https://github.com/appcelerator/alloy/blob/master/LICENSE) file for more information._
